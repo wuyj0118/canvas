@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>test</title>
+  <style>
+    body, html {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+    }
+    #canvas {
+      box-shadow: 4px 4px 12px rgba(0,0,0,0.5);
+      position: absolute;
+      left: 10%;
+      top: 5%;
+    }
+  </style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<script src="../assets/script/utils.js"></script>
+<script src="../assets/components/Ball.js"></script>
+<script>
+const canvas = document.getElementById('canvas')
+const ctx = canvas.getContext('2d')
+
+let W = canvas.width = 600
+let H = canvas.height = 400
+
+let ball = new Ball({
+	x: W / 2,
+	y: H / 2,
+  r: 40,
+  vx: C.rp([-10, 10]),
+  vy: -10
+}).render(ctx)
+
+let dx = 0, dy = 0, g = 0.2, fx = 0.95, bounce = -0.8, startX = 0, startY = 0, mouse = C.getOffset(canvas), isMouseMove = false;
+
+canvas.addEventListener('mousedown', function (ev) {
+  ev.preventDefault()
+  if (ball.isPoint(mouse)) {
+    isMouseMove = true
+    dx = mouse.x - ball.x
+    dy = mouse.y - ball.y
+    startX = ball.x
+    startY = ball.y
+    canvas.addEventListener('mousemove', moveBallFn)
+    canvas.addEventListener('mouseup', stopBallFn)
+  }
+})
+
+function moveBallFn() {
+  ball.x = mouse.x - dx
+  ball.y = mouse.y - dy
+}
+function stopBallFn() {
+  isMouseMove = false
+  canvas.removeEventListener('mousemove', moveBallFn)
+  canvas.removeEventListener('mouseup', stopBallFn)
+}
+
+function bounceMove() {
+  
+  /*if (Math.abs(ball.vy) <= 0.01) {
+    ball.vy = 0
+  }*/
+
+  if (Math.round(ball.y + ball.r) == H) {
+    ball.vx *= fx;
+    if (Math.abs(ball.vx) <= 0.0001) {
+      ball.vx = 0
+    }
+  }
+
+  ball.vy += g;
+
+
+  ball.x += ball.vx
+  ball.y += ball.vy
+
+
+  let {x, y, r} = ball
+
+  if (x - r <= 0) {
+    ball.x = ball.r
+    ball.vx *= bounce
+  }
+  if (x + r >= W) {
+    ball.x = W - ball.r
+    ball.vx *= bounce
+  }
+
+  if (y - r <= 0) {
+    ball.y = ball.r
+    ball.vy *= bounce
+  }
+  if (y + r >= H) {
+    ball.y = H - ball.r
+    ball.vy *= bounce
+  }
+
+
+}
+
+function setSpeed() {
+  ball.vx = ball.x - startX
+  ball.vy = ball.y - startY
+
+  startX = ball.x
+  startY = ball.y
+}
+
+
+(function move() {
+  window.requestAnimationFrame(move)
+  ctx.clearRect(0, 0, W, H)
+
+  if (!isMouseMove) {
+    bounceMove()
+  } else {
+    setSpeed()
+  }
+
+  ball.render(ctx);
+})()
+
+
+
+
+</script>
+</body>
+</html>
