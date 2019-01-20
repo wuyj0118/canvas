@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>test</title>
+  <style>
+    body, html {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+    }
+    #canvas {
+      box-shadow: 4px 4px 12px rgba(0,0,0,0.5);
+      position: absolute;
+      left: 10%;
+      top: 5%;
+    }
+  </style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<script src="../assets/script/utils.js"></script>
+<script src="../assets/components/Ball.js"></script>
+<script>
+const canvas = document.getElementById('canvas')
+const ctx = canvas.getContext('2d')
+
+let W = canvas.width = 600
+let H = canvas.height = 400
+
+let ball1 = new Ball({
+  x: C.rp([100, 500]),
+  y: C.rp([100, 300]),
+  r: 10
+}).render(ctx);
+
+let ball2 = new Ball({
+  x: C.rp([100, 500]),
+  y: C.rp([100, 300]),
+  r: 10
+}).render(ctx);
+
+let spring = 0.03, mouse = C.getOffset(canvas);
+
+let ball1_dragging = false, ball2_dragging = false, springLength = 120, friction = 0.95;
+
+canvas.addEventListener('mousedown', function (ev) {
+  if (ball1.isPoint(mouse)) {
+    ball1_dragging = true
+  }
+  if (ball2.isPoint(mouse)) {
+    ball2_dragging = true
+  }
+})
+canvas.addEventListener('mousemove', function (ev) {
+  if (ball1_dragging) {
+    ball1.x = mouse.x
+    ball1.y = mouse.y
+  }
+  if (ball2_dragging) {
+    ball2.x = mouse.x
+    ball2.y = mouse.y
+  }
+})
+canvas.addEventListener('mouseup', function (ev) {
+  ball1_dragging = ball2_dragging = false
+});
+
+function springTo(b1, b2) {
+  let dx = b2.x - b1.x
+  let dy = b2.y - b1.y
+  let angle = Math.atan2(dy, dx)
+
+  let targetX = b2.x - springLength * Math.cos(angle)
+  let targetY = b2.y - springLength * Math.sin(angle)
+
+  b1.vx += (targetX - b1.x) * spring;
+  b1.vy += (targetY - b1.y) * spring;
+
+  b1.vx *= friction;
+  b1.vy *= friction;
+
+  b1.x += b1.vx;
+  b1.y += b1.vy;
+}
+
+(function move() {
+  window.requestAnimationFrame(move)
+
+  ctx.clearRect(0, 0, W, H)
+
+  if (!ball1_dragging) {
+    springTo(ball1, ball2)
+  }
+  if (!ball2_dragging) {
+    springTo(ball2, ball1)
+  }
+
+  ctx.beginPath();
+  ctx.lineWidth = 1;
+  ctx.strokeStyle = '#f00';
+  ctx.lineTo(ball1.x, ball1.y)
+  ctx.lineTo(ball2.x, ball2.y)
+  ctx.stroke();
+
+
+  ball1.render(ctx);
+  ball2.render(ctx);
+})()
+
+
+
+
+</script>
+</body>
+</html>
