@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>test</title>
+  <style>
+    body, html {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+    }
+    #canvas {
+      box-shadow: 4px 4px 12px rgba(0,0,0,0.5);
+      position: absolute;
+      left: 10%;
+      top: 5%;
+    }
+  </style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<script src="../assets/script/utils.js"></script>
+<script src="../assets/components/Ball.js"></script>
+<script>
+const canvas = document.getElementById('canvas')
+const ctx = canvas.getContext('2d')
+
+let W = canvas.width = 600
+let H = canvas.height = 400
+
+let balls = []
+for (let i = 0; i < 20; i++) {
+	balls.push(new Ball({
+		x: C.rp([50, W - 50]),
+		y: C.rp([50, H - 50]),
+		r: C.rp([5, 15]),
+		fillStyle: C.rColor()
+	}))
+}
+
+let vr = -0.02, cx = W / 2, cy = H / 2;
+let {sin, cos} = Math;
+
+(function move() {
+	window.requestAnimationFrame(move)
+	ctx.clearRect(0, 0, W, H)
+
+
+	balls.forEach(ball => {
+		let rx = ball.x - cx
+		let ry = ball.y - cy
+
+		let x1 = rx * cos(vr) - ry * sin(vr) // 推导结果公式
+		let y1 = ry * cos(vr) + rx * sin(vr) // 推导结果公式
+
+		ball.x = cx + x1
+		ball.y = cy + y1
+		ball.render(ctx)
+	})
+})()
+
+
+
+
+</script>
+</body>
+</html>

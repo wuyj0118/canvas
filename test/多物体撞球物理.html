@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>test</title>
+  <style>
+    body, html {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+    }
+    #canvas {
+      box-shadow: 4px 4px 12px rgba(0,0,0,0.5);
+      position: absolute;
+      left: 10%;
+      top: 5%;
+      background: #000;
+    }
+  </style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<script src="../assets/script/utils.js"></script>
+<script src="../assets/components/Ball.js"></script>
+<script>
+const canvas = document.getElementById('canvas')
+const ctx = canvas.getContext('2d')
+
+let W = canvas.width = 800
+let H = canvas.height = 600
+
+let balls = []
+
+for (let i = 0; i < 100; i++) {
+	balls.push(new Ball({
+		x: C.rp([50, W - 50]),
+		y: C.rp([50, H - 50]),
+		r: Math.random() > 0.9 ? C.rp([10, 15]) : C.rp([5, 10]),
+		m: C.rp([1,5], true),
+		vx: C.rp([-2, 2]),
+		vy: C.rp([-2, 2]),
+		fillStyle: C.rColor()
+	}))
+}
+
+let bounce = -1;
+
+function drawBall(ball, i) {
+	ball.x += ball.vx
+	ball.y += ball.vy
+
+	for (let j = i + 1; j < balls.length; j++) {
+		C.checkBallHit(ball, balls[j])
+	}
+
+	C.checkBallBounce(ball, W, H, bounce)
+	ball.render(ctx)
+}
+
+(function move() {
+	window.requestAnimationFrame(move)
+	ctx.clearRect(0, 0, W, H)
+
+	
+
+	balls.forEach(drawBall)
+})()
+
+
+
+
+</script>
+</body>
+</html>

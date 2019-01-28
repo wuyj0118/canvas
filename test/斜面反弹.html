@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>test</title>
+  <style>
+    body, html {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+    }
+    #canvas {
+      box-shadow: 4px 4px 12px rgba(0,0,0,0.5);
+      position: absolute;
+      left: 10%;
+      top: 5%;
+    }
+  </style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<script src="../assets/script/utils.js"></script>
+<script src="../assets/components/Ball.js"></script>
+<script src="../assets/components/Line.js"></script>
+<script>
+const canvas = document.getElementById('canvas')
+const ctx = canvas.getContext('2d')
+
+let W = canvas.width = 600
+let H = canvas.height = 400
+
+let ball = new Ball({
+	x: 100,
+	y: 50,
+	r: 15,
+	fillStyle: C.rColor()
+})
+
+let line = new Line({
+	x: 50, y: 200,
+
+	x2: 300, y2: 0,
+	lineWidth: 2,
+	rotation: C.toRad(15),
+	strokeStyle: C.rColor()
+})
+
+let g = 0.2, bounce = -1;
+let sin = Math.sin(line.rotation), cos = Math.cos(line.rotation);
+
+function checkCantBounce() {
+	// 小球相对于中心点的坐标，这里的旋转中心点的坐标 为line的起始坐标
+	let rx = ball.x - line.x
+	let ry = ball.y - line.y
+
+	// 对小球坐标点旋转
+	let x1 = rx * cos + ry * sin
+	let y1 = ry * cos - rx * sin
+
+	// 对小球速度旋转
+	let vx1 = ball.vx * cos + ball.vy * sin
+	let vy1 = ball.vy * cos - ball.vx * sin
+
+	// 旋转后的小球与水平直线的碰撞检测
+	if (x1 + ball.r > line.x1 && x1 - ball.r < line.x2) { // 小球水平位置在斜线范围之内
+		if (y1 + ball.r > 0 && vy1 > y1) { // 表示小球在斜面之上向着斜面运动
+			y1 = -ball.r
+			vy1 *= bounce
+		}
+		if (y1 - ball.r < 0 && vy1 < y1) { // 表示小球在斜面之下向着斜面运动
+			y1 = ball.r
+			vy1 *= bounce
+		}
+	}
+
+	// 将整个系统旋转回原来的坐标系
+	rx = x1 * cos - y1 * sin
+	ry = y1 * cos + x1 * sin
+
+	ball.vx = vx1 * cos - vy1 * sin
+	ball.vy = vy1 * cos + vx1 * sin
+
+	ball.x = line.x + rx
+	ball.y = line.y + ry 
+}
+
+(function move() {
+	window.requestAnimationFrame(move)
+	ctx.clearRect(0, 0, W, H)
+
+	ball.vy += g
+	ball.x += ball.vx
+	ball.y += ball.vy
+
+	// 处理小球斜面反弹
+	checkCantBounce()
+
+	// 处理边界反弹
+	C.checkBallBounce(ball, W, H, bounce)
+
+	ball.render(ctx)
+	line.render(ctx)
+})()
+
+
+
+
+</script>
+</body>
+</html>
